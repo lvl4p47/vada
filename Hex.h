@@ -7,7 +7,7 @@ private:
 	int hx;
 	int hy;
 	int an;
-	int pr;
+	float pr;
 	int ag;
 	int na;
 	bool bd;
@@ -15,15 +15,15 @@ private:
 
 public:
 	Hex();
-	Hex(int x, int y, int n, int v);
+	Hex(int x, int y, int n, float p);
 	void setHX(int);
 	int getHX();
 	void setHY(int);
 	int getHY();
 	void setAN(int);
 	int getAN();
-	void setPR(int);
-	int getPR();
+	void setPR(float);
+	float getPR();
 	void setBD(bool);
 	bool getBD();
 	void setLV(bool);

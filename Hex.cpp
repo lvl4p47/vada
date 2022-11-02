@@ -1,3 +1,4 @@
+
 #include "Hex.h"
 #include <cmath>
 
@@ -12,7 +13,7 @@ Hex::Hex()
 	na = 0;
 	ag = 0;
 }
-Hex::Hex(int x, int y, int n, int p)
+Hex::Hex(int x, int y, int n, float p)
 {
 	hx = x;
 	hy = y;
@@ -43,11 +44,11 @@ int Hex::getAN()
 {
 	return an;
 }
-void Hex::setPR(int p)
+void Hex::setPR(float p)
 {
 	pr = p;
 }
-int Hex::getPR()
+float Hex::getPR()
 {
 	return pr;
 }
@@ -155,7 +156,7 @@ int* Hex::loopneigh(Hex** g, int XG, int YG, int start, int col)
 			n1an = g[hy + dy][hx + dx].getAN();
 			n2an = g[hy + dyn][hx + dxn].getAN();
 		}
-			
+
 		if ((n1bd == bd) &&
 			(n1an == an) &&
 			(n2an != an))

@@ -2,8 +2,9 @@
 #include "TextureManager.h"
 #include <vector>
 
-int scale = 2, k = 3, wk = 1, alpha = 20;
+int scale = 2, k = 2, pk = 5, alpha = 20;
 int w = 4 * scale, h = 7 * scale;
+float gx = 0, gy = 1;
 
 SDL_Texture* wTex;
 SDL_Texture* aTex;
@@ -85,10 +86,11 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 {
 	int* ptr;
 
-	int xc, yc, dp, pc, na, a0, a1, a2, random;
-	
+	int xc, yc, na, a0, a1, a2, random;
+	float dp, pc;
+
 	std::vector<std::vector<int>> min, max;
-	int minmax[2][3] = { {-1, -1, 100},
+	int minmax[2][3] = { {-1, -1, 1000},
 						 {-1, -1, -1} };
 	ptr = g[y][x].loopneigh(g, XG, YG, 0, 1);
 	g[y][x].setPR(0);
@@ -98,7 +100,8 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 	yc = y;
 	while ((ptr[0] != y) || (ptr[1] != x))
 	{
-		dp = ptr[0] - yc;
+		dp = (ptr[0] - yc) * gy + (ptr[1] - xc) * gx;
+
 		xc = ptr[1];
 		yc = ptr[0];
 
@@ -110,13 +113,13 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 
 		a1 = g[yc][xc].angle(g, XG, YG);
 		a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
-		na = a0 + k * a1 + a2 - pc * wk;
+		na = pk * (a0 + k * a1 + a2) - int(pc);
 
 		g[yc][xc].setNA(na);
 		a0 = a1;
 		if (g[yc][xc].find(g, XG, YG, 0))
 		{
-			if (xc < XG - 2 && xc > 1 && yc < YG - 2 && yc > 1)
+			if (xc < XG - 1 && xc > 0 && yc < YG - 1 && yc > 0)
 			{
 				if (na < minmax[0][2])
 				{
@@ -146,11 +149,11 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 			{
 				max.push_back({ yc, xc });
 			}
-		
+
 	}
 
 
-	dp = ptr[0] - yc;
+	dp = (ptr[0] - yc) * gy + (ptr[1] - xc) * gx;
 
 	xc = ptr[1];
 	yc = ptr[0];
@@ -163,13 +166,13 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 
 	a1 = g[yc][xc].angle(g, XG, YG);
 	a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
-	na = a0 + k * a1 + a2 - pc * wk;
+	na = pk * (a0 + k * a1 + a2) - int(pc);
 
 	g[yc][xc].setNA(na);
 
 	if (g[yc][xc].find(g, XG, YG, 0))
 	{
-		if (xc < XG - 2 && xc > 1 && yc < YG - 2 && yc > 1)
+		if (xc < XG - 1 && xc > 0 && yc < YG - 1 && yc > 0)
 		{
 			if (na < minmax[0][2])
 			{
@@ -227,8 +230,6 @@ void Game::render(Hex** g, int XG, int YG)
 
 	for (int i = 0; i < YG; i++)
 	{
-		for (int t = i; t < YG; t += 1)
-			std::cout << " ";
 		for (int j = 0; j < XG; j++)
 		{
 			destR.y = i * h;
@@ -268,93 +269,3 @@ void Game::clean()
 	SDL_Quit();
 	std::cout << "Game cleaned" << std::endl;
 }
-
-/*
-int* ptr;
-	int ag, xc, yc, x, y, na, a0, a1, a2, d1, d2, d3, d4;
-	for (int i = 0; i < YG; i++)
-	{
-		for (int j = 0; j < XG; j++)
-		{
-			if (g[i][j].getBD() != 0)
-			{
-				x = j;
-				y = i;
-				i = YG;
-				j = XG;
-			}
-		}
-	}
-
-	int minmax[2][3] = { {-1, -1, 40},
-						 {-1, -1, -1} };
-	ptr = g[y][x].loopneigh(g, XG, YG, 0, 1);
-	a0 = g[y][x].angle(g, XG, YG);
-	while ((ptr[0] != y) || (ptr[1] != x))
-	{
-		xc = ptr[1];
-		yc = ptr[0];
-		ptr = g[yc][xc].loopneigh(g, XG, YG, ptr[2], 1);
-		a1 = g[yc][xc].angle(g, XG, YG);
-		a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
-		na = a0 + 2 * a1 + a2;
-		g[yc][xc].setNA(na);
-		a0 = a1;
-		d1 = abs(yc - ymin) + abs(xc - xmin);
-		d2 = abs(yc - ymax) + abs(xc - xmax);
-		d3 = abs(minmax[0][0] - ymin) + abs(minmax[0][1] - xmin);
-		d4 = abs(minmax[1][0] - ymax) + abs(minmax[1][1] - xmax);
-		if (na < minmax[0][2] || na == minmax[0][2] && d1 + d2 >= d3 + d4)
-		{
-			minmax[0][0] = yc;
-			minmax[0][1] = xc;
-			minmax[0][2] = na;
-		}
-		if (na > minmax[1][2] || na == minmax[1][2] && d1 + d2 >= d3 + d4)
-		{
-			minmax[1][0] = yc;
-			minmax[1][1] = xc;
-			minmax[1][2] = na;
-		}
-	}
-	ymin = minmax[0][0];
-	xmin = minmax[0][1];
-	ymax = minmax[1][0];
-	xmax = minmax[1][1];
-	if (minmax[0][2] != -1 && minmax[1][2] != 40 && minmax[1][2] - minmax[0][2] > 0)
-	{
-		g[minmax[1][0]][minmax[1][1]].remove(g, XG, YG);
-		g[minmax[0][0]][minmax[0][1]].add(g, XG, YG);
-	}
-
-
-
-
-	for (int i = 0; i < YG; i++)
-	{
-		for (int t = i; t < YG; t += 1)
-			std::cout << " ";
-		for (int j = 0; j < XG; j++)
-		{
-			g[i][j].onborder(g, XG, YG);
-			switch (g[i][j].getAN())
-			{
-			case 0:
-				if (g[i][j].getBD())
-				{
-					SDL_RenderCopy(renderer, aTex, NULL, &destR);
-				}
-				else
-					SDL_RenderCopy(renderer, aTex, NULL, &destR);
-				break;
-			case 1:
-				if (g[i][j].getBD())
-					SDL_RenderCopy(renderer, wTex, NULL, &destR);
-				else
-					SDL_RenderCopy(renderer, wTex, NULL, &destR);
-				break;
-			}
-		}
-
-	}
-*/
