@@ -1,4 +1,3 @@
-
 #include "Hex.h"
 #include <cmath>
 
@@ -46,6 +45,7 @@ int Hex::getAN()
 }
 void Hex::setPR(float p)
 {
+	int x = hx, y = hy, a = an, pre = pr;
 	pr = p;
 }
 float Hex::getPR()
@@ -198,7 +198,7 @@ int Hex::angle(Hex** g, int XG, int YG)
 	//ag = 6 - ag;
 	return ag;
 }
-void Hex::add(Hex** g, int XG, int YG)
+void Hex::add(Hex** g, int XG, int YG, bool l)
 {
 	int r[6] = { -1, -1, 0, 1, 1, 0 };
 	int dx, dy, st = rand() % 6;
@@ -212,12 +212,40 @@ void Hex::add(Hex** g, int XG, int YG)
 			if (g[hy + dy][hx + dx].getAN() == 0)
 			{
 				g[hy + dy][hx + dx].setAN(an);
+				g[hy + dy][hx + dx].setLV(!l);
+
+				for (int i1 = 0; i1 < 6; i1++)
+				{
+					int dx1 = r[(i1 + 1) % 6];
+					int dy1 = r[i1 % 6];
+					if (hy + dy1 >= 0 && hy + dy1 < YG && hx + dx1 >= 0 && hx + dx1 < XG)
+					{
+						g[hy + dy + dy1][hx + dx + dx1].onborder(g, XG, YG);
+						if(!g[hy + dy + dy1][hx + dx + dx1].getBD())
+							g[hy + dy + dy1][hx + dx + dx1].setLV(0);
+					}
+				}
+
 				i = st + 7;
 			}
 		}
 	}
 }
-void Hex::rem(Hex** g, int XG, int YG)
+void Hex::rem(Hex** g, int XG, int YG, bool l)
 {
 	g[hy][hx].setAN(0);
+	g[hy][hx].setLV(0);
+	
+	int r[6] = { -1, -1, 0, 1, 1, 0 };
+	for (int i1 = 0; i1 < 6; i1++)
+	{
+		int dx1 = r[(i1 + 1) % 6];
+		int dy1 = r[i1 % 6];
+		if (hy + dy1 >= 0 && hy + dy1 < YG && hx + dx1 >= 0 && hx + dx1 < XG)
+		{
+			g[hy + dy1][hx + dx1].onborder(g, XG, YG);
+			if (g[hy + dy1][hx + dx1].getBD() && (g[hy + dy1][hx + dx1].getAN() == 1))
+				g[hy + dy1][hx + dx1].setLV(!l);
+		}
+	}
 }

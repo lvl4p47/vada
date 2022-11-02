@@ -2,9 +2,9 @@
 #include "TextureManager.h"
 #include <vector>
 
-int scale = 2, k = 2, pk = 5, alpha = 20;
+int scale = 2, k = 3, pk = 5, alpha = 20;
 int w = 4 * scale, h = 7 * scale;
-float gx = 0, gy = 1;
+float gx = 0, gy = 5;
 
 SDL_Texture* wTex;
 SDL_Texture* aTex;
@@ -82,7 +82,7 @@ void Game::handleEvents()
 	}
 }
 
-void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
+void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 {
 	int* ptr;
 
@@ -93,6 +93,7 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 	int minmax[2][3] = { {-1, -1, 1000},
 						 {-1, -1, -1} };
 	ptr = g[y][x].loopneigh(g, XG, YG, 0, 1);
+
 	g[y][x].setPR(0);
 	a0 = g[y][x].angle(g, XG, YG);
 	pc = 0;
@@ -109,7 +110,7 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 		g[yc][xc].setPR(pc);
 
 		ptr = g[yc][xc].loopneigh(g, XG, YG, ptr[2], 1);
-		g[yc][xc].setLV(!lv);
+		g[yc][xc].setLV(!l);
 
 		a1 = g[yc][xc].angle(g, XG, YG);
 		a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
@@ -162,7 +163,7 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 	g[yc][xc].setPR(pc);
 
 	ptr = g[yc][xc].loopneigh(g, XG, YG, ptr[2], 1);
-	g[yc][xc].setLV(!lv);
+	g[yc][xc].setLV(!l);
 
 	a1 = g[yc][xc].angle(g, XG, YG);
 	a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
@@ -217,14 +218,26 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool lv)
 	}
 	if (minmax[0][2] != 100 && minmax[1][2] != -1 && minmax[1][2] - minmax[0][2] > 0)
 	{
-		g[minmax[0][0]][minmax[0][1]].add(g, XG, YG);
-		g[minmax[1][0]][minmax[1][1]].rem(g, XG, YG);
+		g[minmax[0][0]][minmax[0][1]].add(g, XG, YG, l);
+		g[minmax[1][0]][minmax[1][1]].rem(g, XG, YG, l);
+		
 	}
 }
 
-void Game::render(Hex** g, int XG, int YG)
+void Game::arrupd(Hex** g, int XG, int YG, bool l)
 {
-	bool bord;
+	for (int i = 0; i < YG; i++)
+	{
+		for (int j = 0; j < XG; j++)
+		{
+			g[i][j].onborder(g, XG, YG);
+		}
+	}
+}
+
+void Game::render(Hex** g, int XG, int YG, int x, int y)
+{
+	bool bord, lva;
 
 	SDL_RenderClear(renderer);
 
@@ -234,8 +247,8 @@ void Game::render(Hex** g, int XG, int YG)
 		{
 			destR.y = i * h;
 			destR.x = (2 * j + YG - i) * w;
-			g[i][j].onborder(g, XG, YG);
 			bord = g[i][j].getBD();
+			//lva = g[i][j].getLV();
 			{
 				switch (g[i][j].getAN())
 				{
@@ -255,9 +268,18 @@ void Game::render(Hex** g, int XG, int YG)
 						SDL_RenderCopy(renderer, bfTex, NULL, &destR);
 					break;
 				}
+				/*
+				if (lva)
+					SDL_RenderCopy(renderer, bfTex, NULL, &destR);
+				else
+					SDL_RenderCopy(renderer, wfTex, NULL, &destR);
+					//*/
 			}
 		}
 	}
+	//destR.y = y * h;
+	//destR.x = (2 * x + YG - y) * w;
+	//SDL_RenderCopy(renderer, sTex, NULL, &destR);
 
 	SDL_RenderPresent(renderer);
 }

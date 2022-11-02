@@ -34,7 +34,7 @@ public:
 	bool find(Hex** g, int XG, int YG, int a);
 	void onborder(Hex** g, int XG, int YG);
 	int* loopneigh(Hex** g, int XG, int YG, int start, int col);
-	void add(Hex** g, int XG, int YG);
-	void rem(Hex** g, int XG, int YG);
+	void add(Hex** g, int XG, int YG, bool l);
+	void rem(Hex** g, int XG, int YG, bool l);
 };
 #endif // HEX_H

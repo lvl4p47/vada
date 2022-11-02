@@ -14,7 +14,8 @@ public:
 	void init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
 	void handleEvents();
 	void update(Hex** g, int XG, int YG, int x, int y, bool lv);
-	void render(Hex** g, int XG, int YG);
+	void arrupd(Hex** g, int XG, int YG, bool l);
+	void render(Hex** g, int XG, int YG, int x, int y);
 	void clean();
 
 	bool running() { return isRunning; }
