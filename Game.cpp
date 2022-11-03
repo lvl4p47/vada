@@ -2,9 +2,9 @@
 #include "TextureManager.h"
 #include <vector>
 
-int scale = 2, k = 3, pk = 5, alpha = 20;
+int scale = 2, k = 2, pk = 1, alpha = 20;
 int w = 4 * scale, h = 7 * scale;
-float gx = 0, gy = 5;
+float gx = -1, gy = 0.5;
 
 SDL_Texture* wTex;
 SDL_Texture* aTex;
@@ -86,34 +86,42 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 {
 	int* ptr;
 
-	int xc, yc, na, a0, a1, a2, random;
+	int xc, yc, xn, yn, st, na, a0, a1, a2, random;
 	float dp, pc;
 
 	std::vector<std::vector<int>> min, max;
 	int minmax[2][3] = { {-1, -1, 1000},
-						 {-1, -1, -1} };
+						 {-1, -1, 0}};
 	ptr = g[y][x].loopneigh(g, XG, YG, 0, 1);
+
+	st = ptr[2];
+	xn = ptr[1];
+	yn = ptr[0];
 
 	g[y][x].setPR(0);
 	a0 = g[y][x].angle(g, XG, YG);
 	pc = 0;
 	xc = x;
 	yc = y;
-	while ((ptr[0] != y) || (ptr[1] != x))
+	while ((yn != y) || (xn != x))
 	{
-		dp = (ptr[0] - yc) * gy + (ptr[1] - xc) * gx;
+		dp = (yn - yc) * gy + (xn - xc) * gx;
 
-		xc = ptr[1];
-		yc = ptr[0];
+		xc = xn;
+		yc = yn;
 
 		pc += dp;
 		g[yc][xc].setPR(pc);
 
-		ptr = g[yc][xc].loopneigh(g, XG, YG, ptr[2], 1);
+		ptr = g[yc][xc].loopneigh(g, XG, YG, st, 1);
 		g[yc][xc].setLV(!l);
 
+		st = ptr[2];
+		xn = ptr[1];
+		yn = ptr[0];
+
 		a1 = g[yc][xc].angle(g, XG, YG);
-		a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
+		a2 = g[yn][xn].angle(g, XG, YG);
 		na = pk * (a0 + k * a1 + a2) - int(pc);
 
 		g[yc][xc].setNA(na);
@@ -128,7 +136,7 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 					minmax[0][1] = xc;
 					minmax[0][2] = na;
 					min.clear();
-					min.push_back({ yc, xc });
+					min.push_back({ yc, xc }); // err
 				}
 				else
 					if (na == minmax[0][2])
@@ -154,10 +162,10 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 	}
 
 
-	dp = (ptr[0] - yc) * gy + (ptr[1] - xc) * gx;
+	dp = (yn - yc) * gy + (xn - xc) * gx;
 
-	xc = ptr[1];
-	yc = ptr[0];
+	xc = xn;
+	yc = yn;
 
 	pc += dp;
 	g[yc][xc].setPR(pc);
@@ -165,8 +173,12 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 	ptr = g[yc][xc].loopneigh(g, XG, YG, ptr[2], 1);
 	g[yc][xc].setLV(!l);
 
+	st = ptr[2];
+	xn = ptr[1];
+	yn = ptr[0];
+
 	a1 = g[yc][xc].angle(g, XG, YG);
-	a2 = g[ptr[0]][ptr[1]].angle(g, XG, YG);
+	a2 = g[yn][xn].angle(g, XG, YG);
 	na = pk * (a0 + k * a1 + a2) - int(pc);
 
 	g[yc][xc].setNA(na);
@@ -216,7 +228,7 @@ void Game::update(Hex** g, int XG, int YG, int x, int y, bool l)
 		minmax[1][0] = max[random][0];
 		minmax[1][1] = max[random][1];
 	}
-	if (minmax[0][2] != 100 && minmax[1][2] != -1 && minmax[1][2] - minmax[0][2] > 0)
+	if (minmax[0][0] != -1 && minmax[1][0] != -1)// && minmax[1][2] - minmax[0][2] > 0)
 	{
 		g[minmax[0][0]][minmax[0][1]].add(g, XG, YG, l);
 		g[minmax[1][0]][minmax[1][1]].rem(g, XG, YG, l);

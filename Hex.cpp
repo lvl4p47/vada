@@ -1,5 +1,6 @@
 #include "Hex.h"
 #include <cmath>
+#include <iostream>
 
 Hex::Hex()
 {
@@ -116,7 +117,10 @@ void Hex::onborder(Hex** g, int XG, int YG)
 }
 int* Hex::loopneigh(Hex** g, int XG, int YG, int start, int col)
 {
-	static int a[3] = { -1, -1, -1 };
+	int a[3] = { hy, hx, -1 };
+	//for (int i = 0; i < 3; i++)
+	//	std::cout << a[i] << "\t";
+	//std::cout << "\n";
 	int r[6] = { -1, -1, 0, 1, 1, 0 }; // r[i] = y, r[i + 1] = x
 	int dx, dy, dxn, dyn, n1an, n2an;
 	bool n1bd;
